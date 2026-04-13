@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/                                                                                                                                             
+  
+# Environment                                                                                                                                             
+.env                                                                                                                                                    
+.env.local
+.env.*.local
+
+# Build output
+dist/
+.vite/
+*.tsbuildinfo                                                                                                                                             
+  
+# Logs                                                                                                                                                    
+*.log                                                                                                                                                   
+
+# OS
+.DS_Store
+
+# IDE / tooling                                                                                                                                           
+.claude/
+                                                                                                                                                            
+# Docker DB volumes                                                                                                                                     
+db-data/
