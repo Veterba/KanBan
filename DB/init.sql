@@ -1,20 +1,55 @@
-CREATE DATABASE IF NOT EXISTS KanBan; 
-USE KanBan
+CREATE DATABASE IF NOT EXISTS KanBan;
+USE KanBan;
 
--- Table 1
+CREATE TABLE Users (
+    UserID        INT          NOT NULL AUTO_INCREMENT,
+    Login         VARCHAR(255) NOT NULL,
+    First_Name    VARCHAR(255),
+    Last_Name     VARCHAR(255),
+    Password_Hash VARCHAR(255) NOT NULL,
+    Created_At    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    Updated_At    TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (UserID),
+    UNIQUE (Login)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE  TABLE USER(
-    
-)
+CREATE TABLE Boards (
+    BoardID     INT          NOT NULL AUTO_INCREMENT,
+    UserID      INT          NOT NULL,
+    Board_Title VARCHAR(255) NOT NULL,
+    Created_At  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    Updated_At  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (BoardID),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE LISTS (
+CREATE TABLE Lists (
+    ListID     INT          NOT NULL AUTO_INCREMENT,
+    BoardID    INT          NOT NULL,
+    List_Title VARCHAR(255) NOT NULL,
+    Position   INT          NOT NULL,
+    Created_At TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    Updated_At TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (ListID),
+    FOREIGN KEY (BoardID) REFERENCES Boards(BoardID) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-)
+CREATE TABLE Tasks (
+    TaskID     INT          NOT NULL AUTO_INCREMENT,
+    ListID     INT          NOT NULL,
+    Task_Title VARCHAR(255) NOT NULL,
+    Task_Text  TEXT,
+    Position   INT          NOT NULL,
+    Created_At TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    Updated_At TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (TaskID),
+    FOREIGN KEY (ListID) REFERENCES Lists(ListID) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE BOARD(
+-- Tasks count on a board
 
-)
-
-CREATE TABLE TASKS (
-
-)
+SELECT l.BoardID, COUNT(t.TaskID) AS       
+task_count                                   
+FROM Lists l
+LEFT JOIN Tasks t ON t.ListID = l.ListID     
+GROUP BY l.BoardID; 

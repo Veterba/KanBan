@@ -1,147 +1,276 @@
-# KanBan Board — Project Roadmap
+# KanBan — Step-by-Step Roadmap (Junior Edition)
 
-## Current State
-
-- **Frontend/** — React + Vite + TypeScript + Tailwind + dnd-kit + Three.js (Claude owns this)
-- **Backend/** — Express skeleton with one route, no package.json yet
-- **DB/** — empty folder
-- **Root** — empty docker-compose.yml, .dockerignore started, no git repo yet
+> Goal: finish the backend, containerize everything, put it on a real server, ship it on my own domain.
+> DB is **MySQL** (chose it for school coursework).
+> Rule of thumb: never jump to the next phase until the "how do i know it works" check for the current one passes.
 
 ---
 
-## Phase 0: Project Foundation
+## Phase 1 — Backend Foundations
 
-> Get the basics right before writing real code.
+> current state: `Backend/src/index.js` has an Express app that just serves static files. `db.js` imports `mysql2` and does nothing else. no routes, no db connection. we'll build it piece by piece.
 
-- [X] `git init` and set up `.gitignore` (node_modules, .env, dist, etc.)
-- [X] Create `Backend/package.json` (`npm init`) and install Express
-- [X] Fix Backend/src/index.js — pick one module system (ES modules or CommonJS), add `app.listen()`
-- [X] Create a `.env` file pattern — decide where secrets live (DB credentials, ports)
+### 1.1 Project hygiene
 
-**You'll learn:** git basics, npm project setup, ES modules vs CommonJS
+- [ ] confirm `Backend/package.json` has: `express`, `mysql2`, `dotenv`, `cors`; devDep: `nodemon`
+- [ ] add `"dev": "nodemon src/index.js"` and `"start": "node src/index.js"` scripts
+- [ ] make sure `"type": "module"` is set (we're using `import` syntax, not `require`)
+- [ ] create `Backend/.env.example` (committed, no real values) and `Backend/.env` (gitignored, real values)
+  - vars you'll need: `PORT`, `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
+- [ ] verify `.env` is in `.gitignore`
 
----
+**check:** `npm run dev` still starts the server on port 4000, no crash.
 
-## Phase 1: Database
+**learn:** what `package.json` scripts are, why `.env` exists (secrets out of code), what nodemon does (restarts on save).
 
-> Set up PostgreSQL and learn how an app talks to a database.
+### 1.2 Load env vars at startup
 
-- [X] Choose a DB — PostgreSQL is the standard pick for this kind of project
-- [ ] Design the schema: `boards`, `columns`, `cards` (think about what fields a kanban card needs)
-- [X] Write SQL init script (`DB/init.sql`) to create tables
-- [ ] Install a Node.js DB client (`pg` library) in Backend
-- [ ] Connect Express to PostgreSQL — write a simple query to test the connection
+- [ ] import `dotenv/config` at the very top of `src/index.js` (before anything that reads env)
+- [ ] replace the hardcoded `PORT = 4000` with `process.env.PORT ?? 4000`
 
-**You'll learn:** SQL, relational schema design, connection strings, environment variables
+**check:** change `PORT=5000` in `.env`, restart, server listens on 5000.
 
----
-
-## Phase 2: Backend API
-
-> Build the REST API that the frontend will consume.
-
-- [ ] Plan your endpoints (REST convention):
-  - `GET /api/boards` — list boards
-  - `POST /api/boards` — create board
-  - `GET /api/boards/:id` — get board with columns and cards
-  - `POST /api/columns` — create column
-  - `PATCH /api/columns/:id` — update column (rename, reorder)
-  - `DELETE /api/columns/:id` — delete column
-  - `POST /api/cards` — create card
-  - `PATCH /api/cards/:id` — update card (move, edit, reorder)
-  - `DELETE /api/cards/:id` — delete card
-- [ ] Set up Express router structure (`routes/`, `controllers/`)
-- [ ] Implement CRUD for boards, columns, cards
-- [ ] Add request validation (check required fields exist)
-- [ ] Add error handling middleware
-- [ ] Test endpoints with curl or Postman
-
-**You'll learn:** REST API design, Express routing/middleware, SQL queries from Node, error handling
+**learn:** `process.env`, why env-driven config matters for deploy later.
 
 ---
 
-## Phase 3: Docker
+## Phase 2 — Connect Backend to MySQL
 
-> Containerize everything so it runs the same way everywhere.
+> this is the part u said u don't get. the mental model: your node app opens a **connection pool** (a bunch of reusable sockets to the db), and every request borrows one, runs SQL, returns it to the pool.
 
-- [ ] Write `Backend/Dockerfile` — Node.js container that runs your API
-- [ ] Write `Frontend/Dockerfile` — build step + nginx to serve the static files
-- [ ] Set up `docker-compose.yml` with 3 services:
-  - `db` — PostgreSQL image, with volume for persistence
-  - `backend` — your API, depends on db
-  - `frontend` — nginx serving the built React app
-- [ ] Configure networking — frontend talks to backend, backend talks to db
-- [ ] Use `.env` file with docker-compose for secrets/config
-- [ ] `docker compose up` and verify everything works together
+### 2.1 Get MySQL running locally
 
-**You'll learn:** Dockerfiles, multi-stage builds, docker-compose, container networking, volumes
+- [ ] install MySQL locally (brew on mac: `brew install mysql` then `brew services start mysql`) — OR skip local install and wait until Phase 5 when docker gives u one; up to u
+- [ ] run the `DB/init.sql` script against ur local MySQL (`mysql -u root -p < DB/init.sql`)
+- [ ] create a dedicated db user for the app (don't use `root` from the app). grant it privileges on the `KanBan` db only.
+- [ ] put that user + password into `Backend/.env`
 
----
+**check:** `mysql -u <app_user> -p KanBan -e "SHOW TABLES;"` lists Users, Boards, Lists, Tasks.
 
-## Phase 4: Connect Frontend to Backend
+**learn:** mysql CLI basics, users & grants, why apps shouldn't login as root.
 
-> Wire the UI to real data (Claude builds the frontend integration, you review).
+### 2.2 Build a real `db.js`
 
-- [ ] Set up API client in Frontend (fetch or axios)
-- [ ] Replace any mock/hardcoded data with API calls
-- [ ] Handle loading and error states
-- [ ] Make drag-and-drop persist changes via PATCH endpoints
-- [ ] Add CORS configuration in Backend
+- [ ] in `Backend/src/db.js`, use `mysql2/promise` (not the callback version — promises play nicer with async/await)
+- [ ] create a **connection pool** using `mysql.createPool({...})` reading host/user/password/database/port from `process.env`
+- [ ] export the pool as the default export
+- [ ] add a tiny "ping" function that runs `SELECT 1` and logs success/failure
 
-**You'll learn:** how frontend-backend communication works, CORS, API integration patterns
+**check:** import that ping into `index.js`, call it on startup; `npm run dev` logs "db ok". kill mysql, restart backend, it should log a clear error (not crash silently).
 
----
+**learn:** connection pools vs single connections, callbacks vs promises, why `SELECT 1` is the universal "is it alive" query.
 
-## Phase 5: DevOps & Deployment
+### 2.3 Write your first real query
 
-> Get it running on a real server.
+- [ ] make a quick throwaway route `GET /api/debug/users` that `SELECT *`s from Users and returns JSON
+- [ ] hit it with `curl http://localhost:4000/api/debug/users`
+- [ ] insert one row manually via mysql CLI, re-hit the endpoint, see the row
 
-- [ ] Pick a hosting target (VPS like DigitalOcean/Hetzner, or a free tier like Railway/Render)
-- [ ] Set up a reverse proxy (nginx or Caddy) to route traffic
-- [ ] Configure environment variables for production
-- [ ] Set up CI/CD — GitHub Actions to build/test on push
-- [ ] Add a health check endpoint (`GET /api/health`)
-- [ ] (Optional) Add SSL/HTTPS with Let's Encrypt
+**check:** endpoint returns an array of users as JSON.
 
-**You'll learn:** Linux server basics, reverse proxies, CI/CD pipelines, environment management
+**learn:** parameterized queries (`?` placeholders) — NEVER concatenate strings into SQL (that's how SQL injection happens). remove the debug route when done.
 
 ---
 
-## Phase 6: Polish & Extras (Optional)
+## Phase 3 — Build the REST API
 
-> Nice-to-haves once the core works.
+> REST = a convention for http endpoints. GET reads, POST creates, PATCH edits, DELETE deletes. urls name resources (`/api/boards/42`), not actions (`/api/getBoard?id=42`).
 
-- [ ] User authentication (JWT or sessions)
-- [ ] WebSocket for real-time board updates
-- [ ] Database migrations tool (like `node-pg-migrate`)
-- [ ] Logging (structured logs with pino or winston)
-- [ ] Rate limiting and security headers (helmet)
-- [ ] Monitoring / uptime checks
+### 3.1 Folder structure
+
+- [ ] make `Backend/src/routes/` and `Backend/src/controllers/`
+- [ ] rule: **routes** = URL → controller function mapping. **controllers** = the actual logic (talk to db, return json). keeps index.js clean.
+- [ ] add `app.use(express.json())` in index.js so req bodies get parsed
+
+### 3.2 Endpoints to build (in this order — easier → harder)
+
+do each one = route + controller + test with curl before moving on.
+
+- [ ] `GET /api/health` → returns `{ status: "ok" }`. trivial, but u'll need it later for monitoring.
+- [ ] `GET /api/boards` → list all boards (later: filter by user)
+- [ ] `POST /api/boards` → create a board (body: `{ title, userId }`)
+- [ ] `GET /api/boards/:id` → return the board PLUS its lists PLUS each list's tasks, nested. this one's chunky — probably 3 queries or 1 join.
+- [ ] `POST /api/lists` → create a list in a board
+- [ ] `PATCH /api/lists/:id` → rename a list / change its position
+- [ ] `DELETE /api/lists/:id` → delete (cascade handles tasks bc of FK)
+- [ ] `POST /api/tasks` → create a task in a list
+- [ ] `PATCH /api/tasks/:id` → edit title/text or move (change list_id + position)
+- [ ] `DELETE /api/tasks/:id` → delete
+
+**check per endpoint:** hit it with curl or Postman, verify the db row changes as expected via mysql CLI.
+
+### 3.3 Basic validation + errors
+
+- [ ] for each POST/PATCH, verify required fields exist in the body; return `400` with a message if not
+- [ ] wrap controllers in try/catch — on error, return `500` and log the real error server-side (don't leak stack traces to the client)
+- [ ] add a global error-handling middleware at the end of `index.js`
+
+**check:** sending an empty POST body returns 400, not a crash.
+
+### 3.4 CORS
+
+- [ ] add the `cors` middleware, allow the frontend origin (`http://localhost:5173` in dev)
+
+**check:** frontend can fetch `/api/health` from the browser without a CORS error.
+
+**learn in this phase:** REST, express routing, middleware order (matters!), status codes, parameterized SQL, CORS.
 
 ---
 
-## Who Does What
+## Phase 4 — Frontend Integration
+
+> mostly Claude's job. your job: review the PR, understand the patterns.
+
+- [ ] (Claude) add an API client using `fetch`, base URL from env
+- [ ] (Claude) replace any mock data with real API calls
+- [ ] (Claude) wire drag-and-drop to PATCH endpoints so moves persist
+- [ ] (Claude) loading + error states in the UI
+
+**check:** full flow — create board → add list → add task → drag task → refresh page → state persisted.
+
+---
+
+## Phase 5 — Docker
+
+> containers = "ship my app + all its dependencies as one sealed box." docker-compose = "run several boxes together and let them talk."
+
+### 5.1 Backend Dockerfile
+
+- [ ] base image: `node:20-alpine` (alpine = tiny)
+- [ ] copy `package*.json`, run `npm ci`, then copy source — this ordering leverages docker's layer cache so code edits don't reinstall deps
+- [ ] `EXPOSE` the backend port, set `CMD ["node", "src/index.js"]`
+
+**check:** `docker build -t kanban-backend ./Backend` succeeds, `docker run` it with env vars and it logs "listening".
+
+### 5.2 Frontend Dockerfile (multi-stage)
+
+- [ ] stage 1: `node:20-alpine` — `npm ci && npm run build` → produces `dist/`
+- [ ] stage 2: `nginx:alpine` — copy `dist/` into `/usr/share/nginx/html/`
+- [ ] add a tiny nginx config that proxies `/api/*` to the backend service (or keep them separate and let frontend hit backend by hostname)
+
+**learn:** why multi-stage (build tools don't ship to prod → smaller, safer image).
+
+### 5.3 docker-compose.yml
+
+- [ ] three services: `db` (mysql:8), `backend`, `frontend`
+- [ ] `db`: named volume mounted at `/var/lib/mysql` (so data survives restarts); env vars `MYSQL_ROOT_PASSWORD`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`
+- [ ] mount `DB/init.sql` into `/docker-entrypoint-initdb.d/` — mysql auto-runs it on first boot
+- [ ] `backend` `depends_on: [db]`; talks to db using hostname `db` (compose handles DNS between services)
+- [ ] `frontend` `depends_on: [backend]`; only frontend exposes a port to the host
+- [ ] use an `.env` file next to compose for secrets
+
+**check:** `docker compose up --build`, visit `http://localhost`, app works end-to-end. `docker compose down` then `up` again — data is still there (volume worked).
+
+**learn:** Dockerfiles, layer caching, multi-stage builds, compose networking, named volumes, init scripts.
+
+---
+
+## Phase 6 — Server & Domain
+
+### 6.1 Pick a VPS
+
+- [ ] Hetzner (cheap, good), DigitalOcean (docs), or Contabo (stupidly cheap) — any ~5€/mo box is fine
+- [ ] pick Ubuntu 24.04 LTS for sanity
+
+### 6.2 Harden the box (first 20 min on any new server)
+
+- [ ] create a non-root user, add your SSH public key to it
+- [ ] disable root SSH login + disable password auth (keys only) in `/etc/ssh/sshd_config`
+- [ ] install + enable `ufw`: allow 22, 80, 443 only
+- [ ] install `fail2ban` (bans IPs hammering SSH)
+
+**check:** u can SSH in as non-root with ur key; password login refused; `ufw status` shows only 22/80/443.
+
+### 6.3 Install Docker on the server
+
+- [ ] follow docker's official "Install Docker Engine on Ubuntu" guide — don't use random blog instructions, they go stale
+
+### 6.4 Domain + DNS
+
+- [ ] buy a domain (namecheap, porkbun, cloudflare registrar — cloudflare's the cheapest if u plan to use their DNS)
+- [ ] at ur registrar's DNS panel, add an **A record**: `@` → VPS IP, TTL low (300s) while testing
+- [ ] wait for DNS to propagate (`dig yourdomain.com` from ur laptop should show the VPS IP)
+
+### 6.5 Reverse proxy + HTTPS
+
+- [ ] use **Caddy** — it auto-provisions Let's Encrypt certs with ~3 lines of config. nginx+certbot works too but more manual steps.
+- [ ] Caddyfile tells Caddy: "for yourdomain.com, reverse_proxy to the frontend container"
+- [ ] run Caddy as a fourth service in compose, binding 80/443 on the host
+- [ ] backend + db are NOT exposed to the host — only Caddy is
+
+**check:** `https://yourdomain.com` loads with a valid padlock. `curl -I http://yourdomain.com` returns a 308 redirect to https.
+
+**learn:** Linux user mgmt, SSH hardening, ufw, DNS records, reverse proxies, how TLS certs are actually issued.
+
+---
+
+## Phase 7 — Deploy Pipeline
+
+> goal: `git push` and prod updates itself. start dumb, graduate later.
+
+### 7.1 Manual deploy first
+
+- [ ] on the server, clone the repo, create `.env.production`, `docker compose up -d --build`
+- [ ] practice the whole loop: change code locally → push → SSH in → `git pull` → `docker compose up -d --build`
+- [ ] do this ~3 times. feel the pain. THEN automate.
+
+### 7.2 Automate with GitHub Actions
+
+- [ ] workflow on push to `master`:
+  1. checkout, install, lint, build (fails fast if code broken)
+  2. build docker images
+  3. push images to GHCR (GitHub Container Registry — free for public repos)
+  4. SSH into VPS (using a deploy key stored in repo secrets), `docker compose pull && docker compose up -d`
+- [ ] repo secrets u'll need: `SSH_PRIVATE_KEY`, `SSH_HOST`, `SSH_USER`, registry token
+
+**check:** push a trivial change to master, grab a coffee, come back, change is live on the domain.
+
+**learn:** CI/CD, YAML workflow syntax, secret management, container registries, ssh-based deploys.
+
+---
+
+## Phase 8 — Production Hygiene
+
+don't skip this or u'll regret it the first time something breaks.
+
+- [ ] nightly `mysqldump` cron, uploaded to S3-compatible storage (backblaze b2 is cheapest); test that u can actually restore from it
+- [ ] structured logs — add `pino` in backend; access them with `docker compose logs backend`
+- [ ] uptime monitor — UptimeRobot free tier pings `/api/health` every 5min, emails u on failure
+- [ ] `helmet` middleware in express (sets security headers)
+- [ ] rate limiting (`express-rate-limit`) on auth/write endpoints
+- [ ] `logrotate` or docker's `max-size` log driver so logs don't eat the disk
+
+---
+
+## Stretch (only after everything above is solid)
+
+- [ ] user auth (JWT or sessions) — currently Users table exists but no login flow
+- [ ] staging subdomain (`staging.yourdomain.com`) pointing at a separate compose stack
+- [ ] migrations tool (`knex` migrate or `dbmate`) so schema changes aren't "ssh in and run sql"
+- [ ] Terraform or Ansible for the VPS, so u can rebuild it from scratch in 10min
+- [ ] WebSockets for real-time multi-user board updates
+
+---
+
+## Ownership
 
 | Area | Owner |
 |------|-------|
-| Backend API | You |
-| Database schema & queries | You |
-| Docker & docker-compose | You |
-| CI/CD & deployment | You |
-| Frontend UI & components | Claude |
-| API integration in frontend | Claude (you review) |
+| Backend, DB, Docker, server, domain, CI/CD | me |
+| Frontend UI, API integration, build config | Claude |
+
+---
+
+## DB Design Notes (reference)
+
+1. Users: UserID, Login, Password_Hash, First_Name, Last_Name
+2. Boards: BoardID, UserID, Board_Title
+3. Lists: ListID, BoardID, List_Title, Position
+4. Tasks: TaskID, ListID, Task_Title, Task_Text, Position
+
+- drag & drop uses `Position` — simplest: on reorder, update the moved row's position and shift siblings. fancier: sparse integers (10, 20, 30...) so u can insert between without re-numbering everything.
+- password hashing: bcrypt or argon2 at signup, store only the hash. never the plaintext. never md5/sha1.
+- task count per board: join Lists→Tasks, group by BoardID (see the query at the bottom of `init.sql`).
 
 
-### DB design
- Цель данной базы данных является хранение информации о пользователях, досках, задачах (возможно workflow - имеется ввиду доска где хранятся списки в которых есть задачи)
-  
-1. Пользователь: ID, Логин, Хэш_Пароль, Name, Surname 
-2. List: ID, Title, Board ID
-3. Задача: ID, Title, Text, List ID, position
-4. Доска: ID, User ID
-   
-- Как будет работать Drag & Drop система - position. Вопрос лишь в том как понимать позицию задачи среди других
-- Переименование - ID не меняется, меняется лишь Имя
-- Новый текст в задачи - ID не меняется, меняется лишь текст
-- Счёт задач в доске - SELECT COUNT(*) FROM tasks WHERE board_id = 5;   
-- Пароль хэшируется и уже хэш пароля выводится в таблицу. Вопрос лишь в как это будет происходить. Нужно в таком случае прописывать хэш функцию. Не понятно немного это
+Implement vedjet like feature 
