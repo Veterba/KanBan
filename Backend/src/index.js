@@ -1,13 +1,13 @@
 import express from 'express'
+import 'dotenv/config'
 
 const app = express()
-const PORT = 4000
+const PORT = process.env.DB_PORT ?? 4000
 
-
-app.use(express.static('frontend/dist'))
-
+app.get('api/health', (req, res) => {
+    res.json({status: 'ok'})
+})
 app.listen(PORT, () => {
     console.log(`http://localhost:${PORT}/`)
-    
 })
 

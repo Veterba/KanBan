@@ -12,12 +12,12 @@
 
 ### 1.1 Project hygiene
 
-- [ ] confirm `Backend/package.json` has: `express`, `mysql2`, `dotenv`, `cors`; devDep: `nodemon`
-- [ ] add `"dev": "nodemon src/index.js"` and `"start": "node src/index.js"` scripts
-- [ ] make sure `"type": "module"` is set (we're using `import` syntax, not `require`)
+- [X] confirm `Backend/package.json` has: `express`, `mysql2`, `dotenv`, `cors`; devDep: `nodemon`
+- [X] add `"dev": "nodemon src/index.js"` and `"start": "node src/index.js"` scripts
+- [X] make sure `"type": "module"` is set (we're using `import` syntax, not `require`)
 - [ ] create `Backend/.env.example` (committed, no real values) and `Backend/.env` (gitignored, real values)
   - vars you'll need: `PORT`, `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
-- [ ] verify `.env` is in `.gitignore`
+- [X] verify `.env` is in `.gitignore`
 
 **check:** `npm run dev` still starts the server on port 4000, no crash.
 
@@ -25,8 +25,8 @@
 
 ### 1.2 Load env vars at startup
 
-- [ ] import `dotenv/config` at the very top of `src/index.js` (before anything that reads env)
-- [ ] replace the hardcoded `PORT = 4000` with `process.env.PORT ?? 4000`
+- [X] import `dotenv/config` at the very top of `src/index.js` (before anything that reads env)
+- [X] replace the hardcoded `PORT = 4000` with `process.env.PORT ?? 4000`
 
 **check:** change `PORT=5000` in `.env`, restart, server listens on 5000.
 
@@ -40,9 +40,9 @@
 
 ### 2.1 Get MySQL running locally
 
-- [ ] install MySQL locally (brew on mac: `brew install mysql` then `brew services start mysql`) — OR skip local install and wait until Phase 5 when docker gives u one; up to u
-- [ ] run the `DB/init.sql` script against ur local MySQL (`mysql -u root -p < DB/init.sql`)
-- [ ] create a dedicated db user for the app (don't use `root` from the app). grant it privileges on the `KanBan` db only.
+- [x] install MySQL locally (brew on mac: `brew install mysql` then `brew services start mysql`) — OR skip local install and wait until Phase 5 when docker gives u one; up to u
+- [x] run the `DB/init.sql` script against ur local MySQL (`mysql -u root -p < DB/init.sql`)
+- [X] create a dedicated db user for the app (don't use `root` from the app). grant it privileges on the `KanBan` db only.
 - [ ] put that user + password into `Backend/.env`
 
 **check:** `mysql -u <app_user> -p KanBan -e "SHOW TABLES;"` lists Users, Boards, Lists, Tasks.
@@ -273,4 +273,4 @@ don't skip this or u'll regret it the first time something breaks.
 - task count per board: join Lists→Tasks, group by BoardID (see the query at the bottom of `init.sql`).
 
 
-Implement vedjet like feature 
+Implement vidjet like feature 
