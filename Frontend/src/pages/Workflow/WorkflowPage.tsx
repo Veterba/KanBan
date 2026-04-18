@@ -221,43 +221,47 @@ export default function WorkflowPage() {
         </header>
 
         {/* Board canvas */}
-        <div className="flex-1 overflow-x-auto overflow-y-hidden p-6">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCorners}
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDragEnd={handleDragEnd}
-          >
-            <div className="flex gap-4 h-full">
-              {columns.map((col) => (
-                <TaskList
-                  key={col.id}
-                  id={col.id}
-                  title={col.title}
-                  tasks={col.tasks.filter((t) =>
-                    t.title.toLowerCase().includes(searchQuery.toLowerCase())
-                  )}
-                  onRename={handleRenameList}
-                  onAddTask={handleAddTask}
-                  onRemoveList={handleRemoveList}
-                  onEditTask={handleEditTask}
-                  onDeleteTask={handleDeleteTask}
-                />
-              ))}
-            </div>
-
-            <DragOverlay>
-              {activeTask ? (
-                <div className="glass-elevated p-3 w-64 shadow-2xl rotate-2">
-                  <p className="text-sm text-text-primary">{activeTask.title}</p>
-                  {activeTask.description && (
-                    <p className="text-xs text-text-secondary mt-1">{activeTask.description}</p>
-                  )}
+        <div className="flex-1 p-4 md:p-6 min-h-0">
+          <div className="glass-board h-full flex flex-col overflow-hidden p-4">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCorners}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
+            >
+              <div className="flex-1 min-h-0 overflow-x-auto overflow-y-hidden -mx-2 px-2">
+                <div className="flex gap-5 items-start h-full">
+                  {columns.map((col) => (
+                    <TaskList
+                      key={col.id}
+                      id={col.id}
+                      title={col.title}
+                      tasks={col.tasks.filter((t) =>
+                        t.title.toLowerCase().includes(searchQuery.toLowerCase())
+                      )}
+                      onRename={handleRenameList}
+                      onAddTask={handleAddTask}
+                      onRemoveList={handleRemoveList}
+                      onEditTask={handleEditTask}
+                      onDeleteTask={handleDeleteTask}
+                    />
+                  ))}
                 </div>
-              ) : null}
-            </DragOverlay>
-          </DndContext>
+              </div>
+
+              <DragOverlay>
+                {activeTask ? (
+                  <div className="glass-elevated p-3 w-64 shadow-2xl rotate-2">
+                    <p className="text-sm text-text-primary">{activeTask.title}</p>
+                    {activeTask.description && (
+                      <p className="text-xs text-text-secondary mt-1">{activeTask.description}</p>
+                    )}
+                  </div>
+                ) : null}
+              </DragOverlay>
+            </DndContext>
+          </div>
         </div>
 
         {/* Bottom bar */}

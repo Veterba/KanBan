@@ -5,15 +5,22 @@
   --color-bg-base: #0e0e14;
   --color-bg-surface: rgba(255, 255, 255, 0.06);
   --color-bg-elevated: rgba(255, 255, 255, 0.10);
+  --color-bg-board: rgba(255, 255, 255, 0.03);
   --color-text-primary: #EDEDEF;
   --color-text-secondary: #8A8F98;
   --color-border-glass: rgba(255, 255, 255, 0.08);
   --color-border-glass-hover: rgba(255, 255, 255, 0.15);
+  --color-border-glass-strong: rgba(255, 255, 255, 0.12);
   --color-accent: #5E6AD2;
   --color-accent-hover: #6E7AE2;
   --color-accent-glow: rgba(94, 106, 210, 0.25);
   --color-destructive: #DC2626;
   --radius-glass: 16px;
+  --radius-board: 20px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.35), 0 4px 12px rgba(0, 0, 0, 0.2);
+  --shadow-glow: 0 0 32px rgba(94, 106, 210, 0.15);
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 }
 
@@ -37,6 +44,29 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ambient aurora — gives the blurred board surface real color variation to blur,
+     not a flat wash. multiple scattered blobs in accent/violet/teal/rose. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: -10%;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse 45% 35% at 12% 8%, rgba(94, 106, 210, 0.35), transparent 65%),
+      radial-gradient(ellipse 40% 35% at 88% 18%, rgba(180, 120, 255, 0.28), transparent 65%),
+      radial-gradient(ellipse 50% 40% at 75% 85%, rgba(255, 110, 180, 0.22), transparent 65%),
+      radial-gradient(ellipse 45% 40% at 20% 92%, rgba(80, 200, 220, 0.22), transparent 65%),
+      radial-gradient(ellipse 35% 30% at 55% 55%, rgba(120, 90, 255, 0.18), transparent 70%);
+    filter: blur(60px);
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
   }
 
   ::selection {
@@ -72,6 +102,26 @@
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-bottom: 1px solid var(--color-border-glass);
+  }
+
+  .glass-board {
+    background: var(--color-bg-board);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid var(--color-border-glass-strong);
+    border-radius: var(--radius-board);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .card-interactive {
+    transition:
+      box-shadow 160ms ease-out,
+      background-color 160ms ease-out,
+      border-color 160ms ease-out;
+  }
+  .card-interactive:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-glass-hover);
   }
 }
 

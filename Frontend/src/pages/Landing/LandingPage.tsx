@@ -1,10 +1,8 @@
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
 import { motion } from 'framer-motion'
 import Hero from './Hero'
 import HeroInteractive from './HeroInteractive'
 import HeroFeatures from './HeroFeatures'
-
-const HeroCTA = lazy(() => import('./HeroCTA'))
 
 export default function LandingPage() {
   return (
@@ -18,7 +16,6 @@ export default function LandingPage() {
       <HeroInteractive />
       <HeroFeatures />
       <Suspense fallback={<div className="min-h-screen" />}>
-        <HeroCTA />
       </Suspense>
     </motion.main>
   )

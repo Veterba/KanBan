@@ -52,7 +52,7 @@ export default function TaskList({ id, title, tasks, onRename, onAddTask, onRemo
 
   return (
     <div
-      className={`glass flex flex-col w-72 shrink-0 transition-colors ${
+      className={`glass flex flex-col w-72 shrink-0 max-h-full shadow-[var(--shadow-sm)] transition-colors ${
         isOver ? 'border-accent/30' : ''
       }`}
     >
@@ -87,11 +87,11 @@ export default function TaskList({ id, title, tasks, onRename, onAddTask, onRemo
             </button>
           </div>
         )}
-        <span className="text-xs text-text-secondary/60 ml-2 shrink-0">{tasks.length}</span>
+        <span className="text-xs text-text-secondary/80 ml-2 shrink-0 tabular-nums">{tasks.length}</span>
       </div>
 
       {/* Cards */}
-      <div ref={setNodeRef} className="flex-1 p-2 flex flex-col gap-2 min-h-[100px] overflow-y-auto max-h-[60vh]">
+      <div ref={setNodeRef} className="p-2 flex flex-col gap-2 min-h-[80px] overflow-y-auto">
         <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
             <TaskCard
@@ -104,12 +104,12 @@ export default function TaskList({ id, title, tasks, onRename, onAddTask, onRemo
         </SortableContext>
         {tasks.length === 0 && (
           <div className="flex flex-col items-center justify-center py-8 gap-2">
-            <p className="text-xs text-text-secondary/40 text-center">
+            <p className="text-xs text-text-secondary/70 text-center">
               No tasks yet
             </p>
             <button
               onClick={() => onAddTask(id)}
-              className="text-xs text-accent/60 hover:text-accent transition-colors cursor-pointer"
+              className="text-xs text-accent/80 hover:text-accent transition-colors cursor-pointer"
             >
               + Add a task
             </button>

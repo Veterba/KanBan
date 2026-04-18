@@ -105,13 +105,13 @@ export default function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className="glass p-3 group/card cursor-default hover:bg-bg-elevated transition-colors"
+      className="glass card-interactive p-3 group/card cursor-default hover:bg-bg-elevated hover:border-border-glass-hover"
     >
       <div className="flex items-start gap-2">
         <button
           {...attributes}
           {...listeners}
-          className="mt-0.5 p-1 text-text-secondary/0 group-hover/card:text-text-secondary/40 hover:!text-text-secondary cursor-grab active:cursor-grabbing rounded transition-colors shrink-0"
+          className="mt-0.5 p-1 text-text-secondary/0 group-hover/card:text-text-secondary/60 hover:!text-text-secondary cursor-grab active:cursor-grabbing rounded transition-colors shrink-0"
           aria-label={`Drag ${task.title}`}
         >
           <GripVertical size={14} />
@@ -127,14 +127,14 @@ export default function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
         <div className="flex gap-0.5 opacity-0 group-hover/card:opacity-100 transition-opacity shrink-0">
           <button
             onClick={() => setEditing(true)}
-            className="p-1 text-text-secondary/60 hover:text-text-primary rounded transition-colors cursor-pointer"
+            className="p-1 text-text-secondary/80 hover:text-text-primary rounded transition-colors cursor-pointer"
             aria-label={`Edit ${task.title}`}
           >
             <Pencil size={12} />
           </button>
           <button
             onClick={() => onDelete(task.id)}
-            className="p-1 text-text-secondary/60 hover:text-destructive rounded transition-colors cursor-pointer"
+            className="p-1 text-text-secondary/80 hover:text-destructive rounded transition-colors cursor-pointer"
             aria-label={`Delete ${task.title}`}
           >
             <Trash2 size={12} />
