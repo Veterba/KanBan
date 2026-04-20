@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
 import {
   DndContext,
@@ -13,7 +14,7 @@ import {
   type DragOverEvent,
 } from '@dnd-kit/core'
 import { sortableKeyboardCoordinates, arrayMove } from '@dnd-kit/sortable'
-import { Search, Plus, Sparkles } from 'lucide-react'
+import { Search, Plus, Sparkles, GripVertical } from 'lucide-react'
 import Sidebar from './Sidebar'
 import TaskList from './TaskList'
 import { type TaskCardData } from './TaskCard'
@@ -250,16 +251,29 @@ export default function WorkflowPage() {
                 </div>
               </div>
 
-              <DragOverlay>
-                {activeTask ? (
-                  <div className="glass-elevated p-3 w-64 shadow-2xl rotate-2">
-                    <p className="text-sm text-text-primary">{activeTask.title}</p>
-                    {activeTask.description && (
-                      <p className="text-xs text-text-secondary mt-1">{activeTask.description}</p>
-                    )}
-                  </div>
-                ) : null}
-              </DragOverlay>
+              {createPortal(
+                <DragOverlay dropAnimation={null}>
+                  {activeTask ? (
+                    <div className="glass p-3 w-64 shadow-[var(--shadow-lg)] cursor-grabbing">
+                      <div className="flex items-start gap-2">
+                        <div className="mt-0.5 p-1 text-text-secondary/60 shrink-0">
+                          <GripVertical size={14} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-text-primary leading-snug">{activeTask.title}</p>
+                          {activeTask.description && (
+                            <p className="text-xs text-text-secondary mt-1 leading-relaxed line-clamp-2">
+                              {activeTask.description}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex gap-0.5 shrink-0 w-[46px]" />
+                      </div>
+                    </div>
+                  ) : null}
+                </DragOverlay>,
+                document.body
+              )}
             </DndContext>
           </div>
         </div>

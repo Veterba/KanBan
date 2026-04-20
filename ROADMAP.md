@@ -43,7 +43,7 @@
 - [x] install MySQL locally (brew on mac: `brew install mysql` then `brew services start mysql`) — OR skip local install and wait until Phase 5 when docker gives u one; up to u
 - [x] run the `DB/init.sql` script against ur local MySQL (`mysql -u root -p < DB/init.sql`)
 - [X] create a dedicated db user for the app (don't use `root` from the app). grant it privileges on the `KanBan` db only.
-- [ ] put that user + password into `Backend/.env`
+- [X] put that user + password into `Backend/.env`
 
 **check:** `mysql -u <app_user> -p KanBan -e "SHOW TABLES;"` lists Users, Boards, Lists, Tasks.
 
@@ -51,10 +51,10 @@
 
 ### 2.2 Build a real `db.js`
 
-- [ ] in `Backend/src/db.js`, use `mysql2/promise` (not the callback version — promises play nicer with async/await)
-- [ ] create a **connection pool** using `mysql.createPool({...})` reading host/user/password/database/port from `process.env`
-- [ ] export the pool as the default export
-- [ ] add a tiny "ping" function that runs `SELECT 1` and logs success/failure
+- [x] in `Backend/src/db.js`, use `mysql2/promise` (not the callback version — promises play nicer with async/await)
+- [x] create a **connection pool** using `mysql.createPool({...})` reading host/user/password/database/port from `process.env`
+- [x] export the pool as the default export
+- [x] add a tiny "ping" function that runs `SELECT 1` and logs success/failure
 
 **check:** import that ping into `index.js`, call it on startup; `npm run dev` logs "db ok". kill mysql, restart backend, it should log a clear error (not crash silently).
 
@@ -62,10 +62,9 @@
 
 ### 2.3 Write your first real query
 
-- [ ] make a quick throwaway route `GET /api/debug/users` that `SELECT *`s from Users and returns JSON
-- [ ] hit it with `curl http://localhost:4000/api/debug/users`
-- [ ] insert one row manually via mysql CLI, re-hit the endpoint, see the row
-
+- [X] make a quick throwaway route `GET /api/debug/users` that `SELECT *`s from Users and returns JSON
+- [X] hit it with `curl http://localhost:4000/api/debug/users`
+- [X] insert one row manually via mysql CLI, re-hit the endpoint, see the row
 **check:** endpoint returns an array of users as JSON.
 
 **learn:** parameterized queries (`?` placeholders) — NEVER concatenate strings into SQL (that's how SQL injection happens). remove the debug route when done.
@@ -78,9 +77,9 @@
 
 ### 3.1 Folder structure
 
-- [ ] make `Backend/src/routes/` and `Backend/src/controllers/`
+- [x] make `Backend/src/routes/` and `Backend/src/controllers/`
 - [ ] rule: **routes** = URL → controller function mapping. **controllers** = the actual logic (talk to db, return json). keeps index.js clean.
-- [ ] add `app.use(express.json())` in index.js so req bodies get parsed
+- [x] add `app.use(express.json())` in index.js so req bodies get parsed
 
 ### 3.2 Endpoints to build (in this order — easier → harder)
 
