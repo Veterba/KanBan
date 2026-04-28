@@ -1,0 +1,9 @@
+# BOARD API CONTROLLERS
+
+@url = http://localhost:4000
+
+
+###
+
+GET {{url}}/api/lists
+
